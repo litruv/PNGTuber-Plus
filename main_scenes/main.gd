@@ -324,6 +324,12 @@ func _on_load_dialog_file_selected(path):
 		sprite.yFrq = data[item]["yFrq"]
 		sprite.yAmp = data[item]["yAmp"]
 		
+		# Load rotation wobble properties (with backward compatibility)
+		if data[item].has("rFrq"):
+			sprite.rFrq = data[item]["rFrq"]
+		if data[item].has("rAmp"):
+			sprite.rAmp = data[item]["rAmp"]
+		
 		sprite.rdragStr = data[item]["rotDrag"]
 		sprite.showOnTalk = data[item]["showTalk"]
 		
@@ -393,6 +399,9 @@ func _on_save_dialog_file_selected(path):
 			data[id]["xAmp"] = child.xAmp
 			data[id]["yFrq"] = child.yFrq
 			data[id]["yAmp"] = child.yAmp
+			
+			data[id]["rFrq"] = child.rFrq
+			data[id]["rAmp"] = child.rAmp
 			
 			data[id]["rotDrag"] = child.rdragStr
 			
@@ -476,6 +485,9 @@ func _on_duplicate_button_pressed():
 	sprite.yFrq = Global.heldSprite.yFrq
 	sprite.yAmp = Global.heldSprite.yAmp
 	
+	sprite.rFrq = Global.heldSprite.rFrq
+	sprite.rAmp = Global.heldSprite.rAmp
+	
 	sprite.rdragStr = Global.heldSprite.rdragStr
 	
 	sprite.offset = Global.heldSprite.offset
@@ -535,7 +547,7 @@ func moveSpriteMenu(delta):
 	
 	var size = get_viewport().get_visible_rect().size
 	
-	var windowLength = 1250 #1187
+	var windowLength = 1400
 	
 	$ViewerArrows/Arrows.position.y =  size.y - 25
 	
