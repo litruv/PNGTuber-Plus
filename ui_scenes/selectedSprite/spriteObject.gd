@@ -55,6 +55,10 @@ var xAmp = 0.0
 var yFrq = 0.0
 var yAmp = 0.0
 
+#Rotation Wobble
+var rFrq = 0.0
+var rAmp = 0.0
+
 #Rotational Drag
 var rdragStr = 0
 var rLimitMax = 180
@@ -331,10 +335,14 @@ func rotationalDrag(length,delta):
 	var yvel = (length * rdragStr)
 	
 	#Calculate Max angle
-	
 	yvel = clamp(yvel,rLimitMin,rLimitMax)
 	
-	sprite.rotation = lerp_angle(sprite.rotation,deg_to_rad(yvel),0.25)
+	# Add rotation wobble as percentage of rotational limits range
+	var rotationRange = rLimitMax - rLimitMin
+	var rotationWobble = sin(tick*rFrq) * (rotationRange * rAmp * 0.01)
+	var totalRotation = yvel + rotationWobble
+	
+	sprite.rotation = lerp_angle(sprite.rotation,deg_to_rad(totalRotation),0.25)
 
 func stretch(length,delta):
 	var yvel = (length * stretchAmount * 0.01)

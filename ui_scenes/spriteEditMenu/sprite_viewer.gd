@@ -42,6 +42,12 @@ func setImage():
 	$WobbleControl/yFrq.value = Global.heldSprite.yFrq
 	$WobbleControl/yAmp.value = Global.heldSprite.yAmp
 	
+	$WobbleControl/rFrqLabel.text = "rotation frequency: " + str(Global.heldSprite.rFrq)
+	$WobbleControl/rAmpLabel.text = "rotation percentage: " + str(Global.heldSprite.rAmp) + "%"
+	
+	$WobbleControl/rFrq.value = Global.heldSprite.rFrq
+	$WobbleControl/rAmp.value = Global.heldSprite.rAmp
+	
 	$Rotation/rDragLabel.text = "rotational drag: " + str(Global.heldSprite.rdragStr)
 	$Rotation/rDrag.value = Global.heldSprite.rdragStr
 	
@@ -137,6 +143,15 @@ func _on_y_frq_value_changed(value):
 func _on_y_amp_value_changed(value):
 	$WobbleControl/yAmpLabel.text = "y amplitude: " + str(value)
 	Global.heldSprite.yAmp = value
+
+
+func _on_r_frq_value_changed(value):
+	$WobbleControl/rFrqLabel.text = "rotation frequency: " + str(value)
+	Global.heldSprite.rFrq = value
+
+func _on_r_amp_value_changed(value):
+	$WobbleControl/rAmpLabel.text = "rotation amplitude: " + str(value) + "%"
+	Global.heldSprite.rAmp = value
 
 
 func _on_r_drag_value_changed(value):
