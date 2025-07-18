@@ -587,9 +587,42 @@ func _on_settings_buttons_pressed():
 func _on_background_input_capture_bg_key_pressed(node, keys_pressed):
 	var keyStrings = []
 	
+	# Check for modifier keys first (cross-platform)
+	var modifiers = []
+	var has_ctrl = keys_pressed.has(KEY_CTRL) and keys_pressed[KEY_CTRL]
+	var has_shift = keys_pressed.has(KEY_SHIFT) and keys_pressed[KEY_SHIFT]
+	var has_alt = keys_pressed.has(KEY_ALT) and keys_pressed[KEY_ALT]
+	var has_meta = keys_pressed.has(KEY_META) and keys_pressed[KEY_META]  # Command key on macOS
+	
+	# Use appropriate modifier names based on platform
+	if has_ctrl:
+		modifiers.append("Ctrl")
+	if has_shift:
+		modifiers.append("Shift")
+	if has_alt:
+		modifiers.append("Alt")
+	if has_meta:
+		modifiers.append("Cmd")  # Command key on macOS
+	
+	# Get non-modifier keys
+	var regular_keys = []
 	for i in keys_pressed:
 		if keys_pressed[i]:
-			keyStrings.append(OS.get_keycode_string(i) if !OS.get_keycode_string(i).strip_edges().is_empty() else "Keycode" + str(i))
+			# Skip modifier keys when building the regular key list
+			if i == KEY_CTRL or i == KEY_SHIFT or i == KEY_ALT or i == KEY_META:
+				continue
+			regular_keys.append(OS.get_keycode_string(i) if !OS.get_keycode_string(i).strip_edges().is_empty() else "Keycode" + str(i))
+	
+	# Create combined key strings
+	if modifiers.size() > 0 and regular_keys.size() > 0:
+		# Create modifier combination strings
+		for key in regular_keys:
+			var combined_key = "+".join(modifiers) + "+" + key
+			keyStrings.append(combined_key)
+	else:
+		# No modifiers, use regular keys
+		for key in regular_keys:
+			keyStrings.append(key)
 	
 	if fileSystemOpen:
 		return
