@@ -599,9 +599,36 @@ func _on_settings_buttons_pressed():
 func _on_background_input_capture_bg_key_pressed(node, keys_pressed):
 	var keyStrings = []
 	
+	# Check for modifier keys first (cross-platform)
+	var modifiers = []
+	var has_ctrl = keys_pressed.has(KEY_CTRL) and keys_pressed[KEY_CTRL]
+	var has_shift = keys_pressed.has(KEY_SHIFT) and keys_pressed[KEY_SHIFT]
+	var has_alt = keys_pressed.has(KEY_ALT) and keys_pressed[KEY_ALT]
+	var has_meta = keys_pressed.has(KEY_META) and keys_pressed[KEY_META]  # Command key on macOS
+	
+	# Build modifier prefix once
+	if has_ctrl:
+		modifiers.append("Ctrl")
+	if has_shift:
+		modifiers.append("Shift")
+	if has_alt:
+		modifiers.append("Alt")
+	if has_meta:
+		modifiers.append("Cmd")  # Command key on macOS
+	
+	var modifier_prefix = ""
+	if modifiers.size() > 0:
+		modifier_prefix = "+".join(modifiers) + "+"
+	
+	# Single pass: build key strings directly
 	for i in keys_pressed:
 		if keys_pressed[i]:
-			keyStrings.append(OS.get_keycode_string(i) if !OS.get_keycode_string(i).strip_edges().is_empty() else "Keycode" + str(i))
+			# Skip modifier keys
+			if i == KEY_CTRL or i == KEY_SHIFT or i == KEY_ALT or i == KEY_META:
+				continue
+			
+			var key_name = OS.get_keycode_string(i) if !OS.get_keycode_string(i).strip_edges().is_empty() else "Keycode" + str(i)
+			keyStrings.append(modifier_prefix + key_name)
 	
 	if fileSystemOpen:
 		return
