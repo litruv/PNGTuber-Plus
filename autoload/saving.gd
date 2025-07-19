@@ -54,13 +54,13 @@ var settings = {
 	"bounce":250,
 	"gravity":1000,
 	"maxFPS":60,
-	"secondsToMicReset":180,
 	"backgroundColor":var_to_str(Color(0.0,0.0,0.0,0.0)),
 	"filtering":false,
 	"costumeKeys":["1","2","3","4","5","6","7","8","9","0"],
 	"blinkSpeed":1.0,
 	"blinkChance":200,
 	"bounceOnCostumeChange":false,
+	"experimentalMicLoudness":false,
 }
 
 var settingsPath = "user://settings.pngtp"

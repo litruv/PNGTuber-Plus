@@ -46,6 +46,8 @@ func setvalues():
 		label.text = "costume " + str(tag) + " key: \"" + Global.main.costumeKeys[tag-1] + "\""
 		tag += 1
 	
+	$experimentalMicLoudness/checkmark.button_pressed = Global.experimentalMicLoudness
+	
 func _on_color_picker_button_color_changed(color):
 	get_viewport().transparent_bg = false
 	RenderingServer.set_default_clear_color(color)
@@ -205,6 +207,12 @@ func _on_stream_deck_check_toggled(button_pressed):
 	if get_node_or_null("/root/ElgatoStreamDeck"):
 		get_node("/root/ElgatoStreamDeck").refresh_connection()
 	Global.pushUpdate("StreamDeck integration " + ("enabled" if button_pressed else "disabled") + ".")
+
+## Handle experimental microphone loudness toggle
+## @param checked: bool - Whether experimental mic loudness should be enabled
+func _on_experimental_mic_loudness_toggle(checked):
+	Global.experimentalMicLoudness = checked
+	Saving.settings["experimentalMicLoudness"] = checked
 
 
 func _process(delta):

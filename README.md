@@ -14,3 +14,4 @@
 - **Original Project**: PNGTuber Plus base application
 - **StreamDeck Plugin**: Based on [BoyneGames StreamDeck Godot Plugin](https://github.com/BoyneGames/streamdeck-godot-plugin)
 - **Enhanced Features**: Max Litruv Boonzaayer
+- **Microphone Improvements**: k0ffinz/Ralsi - Experimental mic loudness detection, improved audio initialization, and audio delay fixes from [k0ffinz/PNGTuber-Plus](https://github.com/k0ffinz/PNGTuber-Plus)
