@@ -213,6 +213,7 @@ func _on_stream_deck_check_toggled(button_pressed):
 func _on_experimental_mic_loudness_toggle(checked):
 	Global.experimentalMicLoudness = checked
 	Saving.settings["experimentalMicLoudness"] = checked
+	print("Experimental mic loudness: ", checked)
 
 
 func _process(delta):
