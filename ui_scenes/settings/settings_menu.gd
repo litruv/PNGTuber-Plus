@@ -1,9 +1,15 @@
 extends Node2D
 
-var awaitingCostumeInput = -1
+## Settings Menu Controller
+##
+## Manages the settings UI and user preferences for the PNGTuber application.
+## Handles various settings including background color, FPS, bounce physics,
+## costume keys, and StreamDeck integration.
 
+var awaitingCostumeInput = -1
 var hasMouse = false
 
+## Initialize all setting values to match current configuration
 func setvalues():
 	
 	$Background/ColorPickerButton.color = Global.backgroundColor
@@ -31,6 +37,8 @@ func setvalues():
 	$BlinkChance/Label.text = "blink chance: 1 in " + str(Global.blinkChance) 
 	
 	$bounceOnCostume/costumeCheck.button_pressed = Global.main.bounceOnCostumeChange
+	
+	$StreamDeck/streamDeckCheck.button_pressed = Saving.settings["useStreamDeck"]
 	
 	var costumeLabels = [$CostumeInputs/ScrollContainer/VBoxContainer/costumeButton1/Label,$CostumeInputs/ScrollContainer/VBoxContainer/costumeButton2/Label,$CostumeInputs/ScrollContainer/VBoxContainer/costumeButton3/Label,$CostumeInputs/ScrollContainer/VBoxContainer/costumeButton4/Label,$CostumeInputs/ScrollContainer/VBoxContainer/costumeButton5/Label,$CostumeInputs/ScrollContainer/VBoxContainer/costumeButton6/Label,$CostumeInputs/ScrollContainer/VBoxContainer/costumeButton7/Label,$CostumeInputs/ScrollContainer/VBoxContainer/costumeButton8/Label,$CostumeInputs/ScrollContainer/VBoxContainer/costumeButton9/Label,$CostumeInputs/ScrollContainer/VBoxContainer/costumeButton10/Label,]
 	var tag = 1
@@ -189,6 +197,14 @@ func _on_blink_chance_value_changed(value):
 func _on_costume_check_toggled(button_pressed):
 	Global.main.bounceOnCostumeChange = button_pressed
 	Saving.settings["bounceOnCostumeChange"] = button_pressed
+
+## Handle StreamDeck integration toggle
+## @param button_pressed: bool - Whether StreamDeck should be enabled
+func _on_stream_deck_check_toggled(button_pressed):
+	Saving.settings["useStreamDeck"] = button_pressed
+	if ElgatoStreamDeck:
+		ElgatoStreamDeck.refresh_connection()
+	Global.pushUpdate("StreamDeck integration " + ("enabled" if button_pressed else "disabled") + ".")
 
 
 func _process(delta):
