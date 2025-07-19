@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build PNGTuber-Plus",
+			"type": "shell",
+			"command": "cd c:\\DEV\\Sync\\PNGTuber-Plus && .\\build-windows.bat",
+			"group": "build"
+		}
+	]
+}

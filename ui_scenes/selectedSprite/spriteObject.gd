@@ -28,6 +28,9 @@ var imageSize = Vector2.ZERO
 @onready var wob = $WobbleOrigin
 
 @onready var outlineScene = preload("res://ui_scenes/selectedSprite/outline.tscn")
+@onready var opacityShader = preload("res://ui_scenes/selectedSprite/opacity.gdshader")
+
+var opacityMaterial = null
 
 #Visuals
 var mouseOffset = Vector2.ZERO
@@ -82,6 +85,10 @@ var remadePolygon = false
 var clipped = false
 
 var tick = 0
+
+#Opacity
+var spriteOpacity = 1.0
+var affectChildrenOpacity = false
 
 #Vis toggle
 var toggle = "null"
@@ -265,7 +272,24 @@ func talkBlink():
 	var faded = 0.2 * int(Global.main.editMode)
 	var value = (showOnTalk + (showOnBlink*3)) + (int(Global.speaking)*10) + (int(Global.blink)*20)
 	var yes = [0,10,20,30,1,21,12,32,3,13,4,15,26,36,27,38].has(int(value))
-	sprite.self_modulate.a = max(int(yes),faded)
+	var baseAlpha = max(int(yes), faded)
+	
+	# Only handle talk/blink/edit visibility with modulate
+	# Opacity slider effects are handled by shader
+	sprite.self_modulate.a = 1.0  # Always keep original texture alpha for clipping
+	sprite.modulate.a = baseAlpha  # Only apply talk/blink/edit visibility
+
+func calculateParentOpacityMultiplier():
+	var multiplier = 1.0
+	var currentParent = parentSprite
+	
+	# Traverse up the entire parent hierarchy
+	while currentParent != null:
+		if currentParent.affectChildrenOpacity:
+			multiplier *= currentParent.spriteOpacity
+		currentParent = currentParent.parentSprite
+	
+	return multiplier
 
 func delete():
 	queue_free()
@@ -402,6 +426,39 @@ func getAllLinkedSprites():
 		if node.parentId == id:
 			linkedSprites.append(node)
 	return linkedSprites
+
+func updateOpacity():
+	# Force a refresh of opacity for this sprite and its children
+	talkBlink()
+	updateShaderOpacity()
+	
+	# Update all child sprites in the entire hierarchy if this sprite affects children
+	if affectChildrenOpacity:
+		updateChildrenOpacityRecursively()
+
+func updateShaderOpacity():
+	# Calculate total opacity from user settings and parent hierarchy
+	var totalOpacity = spriteOpacity * calculateParentOpacityMultiplier()
+	
+	if totalOpacity >= 1.0:
+		# No shader needed for 100% opacity
+		sprite.material = null
+	else:
+		# Create or update shader material for opacity less than 100%
+		if opacityMaterial == null:
+			opacityMaterial = ShaderMaterial.new()
+			opacityMaterial.shader = opacityShader
+		
+		opacityMaterial.set_shader_parameter("opacity", totalOpacity)
+		sprite.material = opacityMaterial
+
+func updateChildrenOpacityRecursively():
+	var linkedSprites = getAllLinkedSprites()
+	for child in linkedSprites:
+		child.talkBlink()
+		child.updateShaderOpacity()
+		# Always update the entire hierarchy below this child
+		child.updateChildrenOpacityRecursively()
 
 func visToggle(keys):
 	if keys.has(toggle):

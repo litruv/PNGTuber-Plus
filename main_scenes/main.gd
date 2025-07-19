@@ -153,17 +153,8 @@ func _process(delta):
 	followShadow()
 
 func followShadow():
-	shadow.visible = is_instance_valid(Global.heldSprite)
-	if !shadow.visible:
-		return
-	
-	shadow.global_position = Global.heldSprite.sprite.global_position + Vector2(6,6)
-	shadow.global_rotation = Global.heldSprite.sprite.global_rotation
-	shadow.offset = Global.heldSprite.sprite.offset
-		
-	shadow.texture = Global.heldSprite.sprite.texture
-	shadow.hframes = Global.heldSprite.sprite.hframes
-	shadow.frame = Global.heldSprite.sprite.frame
+	# Shadow disabled for selected sprites
+	shadow.visible = false
 	
 
 func isFileSystemOpen():
@@ -362,6 +353,10 @@ func _on_load_dialog_file_selected(path):
 			sprite.clipped = data[item]["clipped"]
 		if data[item].has("toggle"):
 			sprite.toggle = data[item]["toggle"]
+		if data[item].has("spriteOpacity"):
+			sprite.spriteOpacity = data[item]["spriteOpacity"]
+		if data[item].has("affectChildrenOpacity"):
+			sprite.affectChildrenOpacity = data[item]["affectChildrenOpacity"]
 		
 		origin.add_child(sprite)
 		sprite.position = str_to_var(data[item]["pos"])
@@ -423,6 +418,9 @@ func _on_save_dialog_file_selected(path):
 			data[id]["clipped"] = child.clipped
 			
 			data[id]["toggle"] = child.toggle
+			
+			data[id]["spriteOpacity"] = child.spriteOpacity
+			data[id]["affectChildrenOpacity"] = child.affectChildrenOpacity
 			
 		id += 1
 	
@@ -500,6 +498,9 @@ func _on_duplicate_button_pressed():
 	
 	sprite.costumeLayers = Global.heldSprite.costumeLayers
 	
+	sprite.spriteOpacity = Global.heldSprite.spriteOpacity
+	sprite.affectChildrenOpacity = Global.heldSprite.affectChildrenOpacity
+	
 	origin.add_child(sprite)
 	sprite.position = Global.heldSprite.position + Vector2(16,16)
 	
@@ -547,7 +548,7 @@ func moveSpriteMenu(delta):
 	
 	var size = get_viewport().get_visible_rect().size
 	
-	var windowLength = 1400
+	var windowLength = 1500
 	
 	$ViewerArrows/Arrows.position.y =  size.y - 25
 	
@@ -673,4 +674,3 @@ func _on_background_input_capture_bg_key_pressed(node, keys_pressed):
 		if i >= 0:
 			changeCostume(i+1)
 	
-

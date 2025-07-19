@@ -3,6 +3,7 @@
 ![Build Status](https://github.com/litruv/PNGTuber-Plus/workflows/Build%20Windows/badge.svg)
 
 ### Recent Updates by Litruv 
+- **Opacity Controls**: Sprite opacity slider, with hierarchical "affect children" option that also preserves clip mask behavior
 - **GitHub Actions**: Automated Windows builds on every commit
 - **StreamDeck Integration**: Add buttons to enable the streamdeck plugin that was built in
 - **Rotation Wobble**: New sprite rotation effects with frequency and amplitude controls
