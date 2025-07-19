@@ -119,7 +119,7 @@ jobs:
           
           # Create version-like tag and release name
           $tag = "v$date-build$buildNumber"
-          $releaseName = "PNGTuber Plus v$date Build $buildNumber"
+          $releaseName = "PNGTuber+ v$date Build $buildNumber"
           
           Write-Host "Generated tag: $tag"
           Write-Host "Generated release name: $releaseName"
@@ -145,20 +145,7 @@ jobs:
           release_name: ${{ steps.release_info.outputs.release_name }}
           body: |
             Automated build of PNGTuber Plus
-            
-            **Build Information:**
-            - Build Number: ${{ steps.release_info.outputs.build_number }}
-            - Commit: ${{ steps.release_info.outputs.short_sha }}
-            - Built: ${{ github.event.head_commit.timestamp }}
-            
-            ## Recent Updates by Litruv
-            - **Microphone Improvements**: Audio delay fix & experimental loudness detection
-            - **Sprite Masking System**: Advanced masking with opacity controls and file selection
-            - **StreamDeck Integration**: Add buttons to enable the streamdeck plugin that was built in
-            - **Rotation Wobble**: New sprite rotation effects with frequency and amplitude controls  
-            - **Enhanced Modifier Keys**: Support for complex key combinations (Ctrl+Shift+Alt+Cmd)
-            - **Godot 4.4.1 Support**: Updated for latest Godot stable release
-            
+                        
             ## Installation
             1. Download PNGTuber-Plus.exe from the assets below
             2. Run the executable - no installation required!
