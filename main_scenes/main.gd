@@ -627,14 +627,27 @@ func _on_background_input_capture_bg_key_pressed(node, keys_pressed):
 			if i == KEY_CTRL or i == KEY_SHIFT or i == KEY_ALT or i == KEY_META:
 				continue
 			
-			var key_name = OS.get_keycode_string(i) if !OS.get_keycode_string(i).strip_edges().is_empty() else "Keycode" + str(i)
-			keyStrings.append(modifier_prefix + key_name)
+			# Skip mouse button keycodes (common source of phantom inputs)
+			if i == MOUSE_BUTTON_LEFT or i == MOUSE_BUTTON_RIGHT or i == MOUSE_BUTTON_MIDDLE:
+				continue
+			
+			# Skip phantom keypad inputs if no actual keypad connected
+			var key_name = OS.get_keycode_string(i)
+			if key_name.begins_with("kp ") or key_name.begins_with("Kp "):
+				# Skip keypad inputs unless they're from actual key presses
+				continue
+			
+			if !key_name.strip_edges().is_empty():
+				keyStrings.append(modifier_prefix + key_name)
+			else:
+				keyStrings.append(modifier_prefix + "Keycode" + str(i))
 	
 	if fileSystemOpen:
 		return
 	
 	if keyStrings.size() <= 0:
 		emit_signal("emptiedCapture")
+		emit_signal("fatfuckingballs")
 		return
 	
 	if settingsMenu.awaitingCostumeInput >= 0:
@@ -650,6 +663,10 @@ func _on_background_input_capture_bg_key_pressed(node, keys_pressed):
 		Saving.settings["costumeKeys"] = costumeKeys
 		Global.pushUpdate("Changed costume " + str(settingsMenu.awaitingCostumeInput+1) + " hotkey from \"" + currentButton + "\" to \"" + keyStrings[0] + "\"")
 		emit_signal("pressedKey")
+		return
+	
+	# Handle sprite visibility toggles if not waiting for costume input
+	spriteVisToggles.emit(keyStrings)
 	
 	for key in keyStrings:
 		var i = costumeKeys.find(key)
@@ -657,18 +674,3 @@ func _on_background_input_capture_bg_key_pressed(node, keys_pressed):
 			changeCostume(i+1)
 	
 
-
-func bgInputSprite(node, keys_pressed):
-	if fileSystemOpen:
-		return
-	var keyStrings = []
-	
-	for i in keys_pressed:
-		if keys_pressed[i]:
-			keyStrings.append(OS.get_keycode_string(i) if !OS.get_keycode_string(i).strip_edges().is_empty() else "Keycode" + str(i))
-	
-	if keyStrings.size() <= 0:
-		emit_signal("fatfuckingballs")
-		return
-	
-	spriteVisToggles.emit(keyStrings)

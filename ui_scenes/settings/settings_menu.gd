@@ -138,13 +138,10 @@ func _on_bounce_gravity_value_changed(value):
 
 func costumeButtonsPressed(label,id):
 	label.text = "AWAITING INPUT"
-	await Global.main.emptiedCapture
 	awaitingCostumeInput = id - 1
-	
 	
 	await Global.main.pressedKey
 	label.text = "costume " + str(id) + " key: \"" + Global.main.costumeKeys[id - 1] + "\""
-	await Global.main.emptiedCapture
 	awaitingCostumeInput = -1
 
 func _on_costume_button_1_pressed():
