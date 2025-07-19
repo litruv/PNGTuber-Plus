@@ -34,12 +34,26 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path "build\windows"
           & "D:\Godot\Godot_v4.4.1-stable_win64.exe" --headless --verbose --export-release "Windows Desktop" "build\windows\PNGTuber-Plus.exe"
+          Write-Host "Godot exit code: $LASTEXITCODE"
         continue-on-error: false
 
       - name: Check Build Output
         run: |
           Write-Host "Build directory contents:"
-          Get-ChildItem -Path "build\windows" -Recurse | Select-Object Name, Length
+          if (Test-Path "build\windows") {
+            Get-ChildItem -Path "build\windows" -Recurse | Select-Object Name, Length
+          } else {
+            Write-Host "Build directory does not exist!"
+          }
+          
+          if (Test-Path "build\windows\PNGTuber-Plus.exe") {
+            Write-Host "Build SUCCESS: PNGTuber-Plus.exe created"
+            $fileSize = (Get-Item "build\windows\PNGTuber-Plus.exe").Length
+            Write-Host "File size: $fileSize bytes"
+          } else {
+            Write-Host "Build FAILED: PNGTuber-Plus.exe not found"
+            exit 1
+          }
       
       - name: Upload Windows Build
         uses: actions/upload-artifact@v4
