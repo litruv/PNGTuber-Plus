@@ -131,7 +131,7 @@ jobs:
             $latestTag = & git describe --tags --abbrev=0 2>$null
             Write-Host "Latest tag found: $latestTag"
           } catch {
-            Write-Host "No previous tags found, showing all commits"
+            Write-Host "No previous tags found - showing all commits"
           }
           
           # Generate commit history since last tag (or all commits if no tag)
