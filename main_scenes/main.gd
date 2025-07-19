@@ -674,10 +674,11 @@ func _on_background_input_capture_bg_key_pressed(node, keys_pressed):
 	
 	if settingsMenu.awaitingCostumeInput >= 0:
 		
-		if keyStrings[0] == "Keycode1":
-			if !settingsMenu.hasMouse:
-				emit_signal("pressedKey")
-				return
+		# Cancel key assignment if user clicks outside the settings menu  
+		if keyStrings[0] == "Keycode1" and !settingsMenu.hasMouse:
+			# Don't assign the key, just complete the flow
+			emit_signal("pressedKey")
+			return
 		
 		var currentButton = costumeKeys[settingsMenu.awaitingCostumeInput]
 		costumeKeys[settingsMenu.awaitingCostumeInput] = keyStrings[0]
