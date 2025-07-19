@@ -30,7 +30,6 @@ var editMode = true
 @onready var spriteObject = preload("res://ui_scenes/selectedSprite/spriteObject.tscn")
 
 var saveLoaded = false
-var isSelectingMask = false
 
 #Motion
 var yVel = 0
@@ -63,9 +62,7 @@ func _ready():
 	
 	Global.connect("startSpeaking",onSpeak)
 	
-	var streamdeck_node = get_node_or_null("/root/ElgatoStreamDeck")
-	if streamdeck_node:
-		streamdeck_node.on_key_down.connect(changeCostumeStreamDeck)
+	ElgatoStreamDeck.on_key_down.connect(changeCostumeStreamDeck)
 	
 	if Saving.settings["newUser"]:
 		_on_load_dialog_file_selected("default")
@@ -156,9 +153,6 @@ func _process(delta):
 	followShadow()
 
 func followShadow():
-	shadow.visible = false  # Disabled drop shadow
-	return
-	
 	shadow.visible = is_instance_valid(Global.heldSprite)
 	if !shadow.visible:
 		return
@@ -176,9 +170,6 @@ func isFileSystemOpen():
 	for obj in [replaceDialog,fileDialog,saveDialog,loadDialog]:
 		if obj.visible:
 			if obj == replaceDialog:
-				return true
-			# Don't clear held sprite when selecting mask
-			if obj == fileDialog and isSelectingMask:
 				return true
 			Global.heldSprite = null
 			return true
@@ -297,20 +288,7 @@ func _on_add_button_pressed():
 
 #Runs when selecting image in File Dialog
 func _on_file_dialog_file_selected(path):
-	if isSelectingMask:
-		# Handle mask selection
-		if Global.heldSprite != null:
-			Global.heldSprite.setMaskTexture(path)
-			Global.spriteEdit.updateMaskDisplay(path)
-		isSelectingMask = false
-	else:
-		# Handle normal sprite addition
-		add_image(path)
-
-#Opens File Dialog for mask selection
-func openMaskSelection():
-	isSelectingMask = true
-	fileDialog.visible = true
+	add_image(path)
 
 func _on_save_button_pressed():
 	$SaveDialog.visible = true
@@ -385,14 +363,6 @@ func _on_load_dialog_file_selected(path):
 		if data[item].has("toggle"):
 			sprite.toggle = data[item]["toggle"]
 		
-		# Load mask properties
-		if data[item].has("mask_texture_path"):
-			sprite.mask_texture_path = data[item]["mask_texture_path"]
-		if data[item].has("use_mask"):
-			sprite.use_mask = data[item]["use_mask"]
-		if data[item].has("mask_opacity"):
-			sprite.mask_opacity = data[item]["mask_opacity"]
-		
 		origin.add_child(sprite)
 		sprite.position = str_to_var(data[item]["pos"])
 	
@@ -453,11 +423,6 @@ func _on_save_dialog_file_selected(path):
 			data[id]["clipped"] = child.clipped
 			
 			data[id]["toggle"] = child.toggle
-			
-			# Save mask properties
-			data[id]["mask_texture_path"] = child.mask_texture_path
-			data[id]["use_mask"] = child.use_mask
-			data[id]["mask_opacity"] = child.mask_opacity
 			
 		id += 1
 	
@@ -582,7 +547,7 @@ func moveSpriteMenu(delta):
 	
 	var size = get_viewport().get_visible_rect().size
 	
-	var windowLength = 1800
+	var windowLength = 1400
 	
 	$ViewerArrows/Arrows.position.y =  size.y - 25
 	
@@ -639,7 +604,7 @@ func _on_background_input_capture_bg_key_pressed(node, keys_pressed):
 	var has_ctrl = keys_pressed.has(KEY_CTRL) and keys_pressed[KEY_CTRL]
 	var has_shift = keys_pressed.has(KEY_SHIFT) and keys_pressed[KEY_SHIFT]
 	var has_alt = keys_pressed.has(KEY_ALT) and keys_pressed[KEY_ALT]
-	var meta_pressed = keys_pressed.has(KEY_META) and keys_pressed[KEY_META]  # Command key on macOS
+	var has_meta = keys_pressed.has(KEY_META) and keys_pressed[KEY_META]  # Command key on macOS
 	
 	# Build modifier prefix once
 	if has_ctrl:
@@ -648,7 +613,7 @@ func _on_background_input_capture_bg_key_pressed(node, keys_pressed):
 		modifiers.append("Shift")
 	if has_alt:
 		modifiers.append("Alt")
-	if meta_pressed:
+	if has_meta:
 		modifiers.append("Cmd")  # Command key on macOS
 	
 	var modifier_prefix = ""

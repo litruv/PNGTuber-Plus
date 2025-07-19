@@ -204,8 +204,8 @@ func _on_costume_check_toggled(button_pressed):
 ## @param button_pressed: bool - Whether StreamDeck should be enabled
 func _on_stream_deck_check_toggled(button_pressed):
 	Saving.settings["useStreamDeck"] = button_pressed
-	if get_node_or_null("/root/ElgatoStreamDeck"):
-		get_node("/root/ElgatoStreamDeck").refresh_connection()
+	if ElgatoStreamDeck:
+		ElgatoStreamDeck.refresh_connection()
 	Global.pushUpdate("StreamDeck integration " + ("enabled" if button_pressed else "disabled") + ".")
 
 ## Handle experimental microphone loudness toggle

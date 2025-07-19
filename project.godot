@@ -148,6 +148,4 @@ textures/canvas_textures/default_texture_filter=0
 textures/canvas_textures/default_texture_repeat=1
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-shading/overrides/force_vertex_shading=true
-shading/overrides/force_lambert_over_burley=true
 environment/defaults/default_clear_color=Color(0.376471, 0.376471, 0.376471, 1)
