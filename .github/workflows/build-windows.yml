@@ -30,36 +30,49 @@ jobs:
           Write-Host "Project file exists: $(Test-Path 'project.godot')"
           Get-ChildItem -Path . -Filter "*.cfg" | Select-Object Name
 
+      - name: Cache Export Templates
+        uses: actions/cache@v4
+        id: cache-templates
+        with:
+          path: C:\WINDOWS\ServiceProfiles\NetworkService\AppData\Roaming\Godot\export_templates\4.4.1.stable
+          key: godot-templates-4.4.1-stable-v1
+
       - name: Setup Export Templates and Tools
+        if: steps.cache-templates.outputs.cache-hit != 'true'
         run: |
           # Setup export templates
           $templateDir = "C:\WINDOWS\ServiceProfiles\NetworkService\AppData\Roaming\Godot\export_templates\4.4.1.stable"
-          Write-Host "Checking for export templates at: $templateDir"
+          Write-Host "Creating export template directory..."
+          New-Item -ItemType Directory -Force -Path $templateDir
           
-          if (-not (Test-Path $templateDir)) {
-            Write-Host "Creating export template directory..."
-            New-Item -ItemType Directory -Force -Path $templateDir
-            
-            Write-Host "Downloading export templates..."
-            Invoke-WebRequest -Uri "https://downloads.tuxfamily.org/godotengine/4.4.1/Godot_v4.4.1-stable_export_templates.tpz" -OutFile "templates.tpz"
-            
-            Write-Host "Extracting templates..."
-            Expand-Archive -Path "templates.tpz" -DestinationPath "temp_templates" -Force
-            
-            Write-Host "Copying templates..."
-            Copy-Item -Path "temp_templates\templates\*" -Destination $templateDir -Recurse -Force
-            
-            Write-Host "Cleaning up..."
-            Remove-Item -Path "temp_templates" -Recurse -Force
-            Remove-Item -Path "templates.tpz" -Force
-            
-            Write-Host "Export templates installed to: $templateDir"
-            Write-Host "Template directory contents:"
-            Get-ChildItem -Path $templateDir | Select-Object Name
+          Write-Host "Downloading export templates..."
+          Invoke-WebRequest -Uri "https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_export_templates.tpz" -OutFile "templates.tpz"
+          
+          Write-Host "Renaming .tpz to .zip for extraction..."
+          Rename-Item "templates.tpz" "templates.zip"
+          
+          Write-Host "Extracting templates..."
+          Expand-Archive -Path "templates.zip" -DestinationPath "temp_templates" -Force
+          
+          Write-Host "Copying templates to correct location..."
+          Copy-Item -Path "temp_templates\templates\*" -Destination $templateDir -Recurse -Force
+          
+          Write-Host "Cleaning up..."
+          Remove-Item -Path "temp_templates" -Recurse -Force
+          Remove-Item -Path "templates.zip" -Force
+          
+          Write-Host "Export templates installed to: $templateDir"
+
+      - name: Verify Templates
+        run: |
+          $templateDir = "C:\WINDOWS\ServiceProfiles\NetworkService\AppData\Roaming\Godot\export_templates\4.4.1.stable"
+          Write-Host "Checking for export templates at: $templateDir"
+          if (Test-Path $templateDir) {
+            Write-Host "Export templates found. Contents:"
+            Get-ChildItem -Path $templateDir | Select-Object Name, Length | Format-Table
           } else {
-            Write-Host "Export templates already exist at: $templateDir"
-            Write-Host "Template directory contents:"
-            Get-ChildItem -Path $templateDir | Select-Object Name
+            Write-Host "ERROR: Export templates not found!"
+            exit 1
           }
           
           # Check if rcedit is available (it's already in the project)

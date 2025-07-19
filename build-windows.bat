@@ -17,14 +17,15 @@ if not exist "%TEMPLATE_DIR%" (
     rem Download templates if the export-pack didn't work
     if not exist "%TEMPLATE_DIR%" (
         echo Downloading export templates...
-        powershell -Command "& {Invoke-WebRequest -Uri 'https://downloads.tuxfamily.org/godotengine/4.4.1/Godot_v4.4.1-stable_export_templates.tpz' -OutFile 'templates.tpz'}"
+        powershell -Command "& {Invoke-WebRequest -Uri 'https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_export_templates.tpz' -OutFile 'templates.tpz'}"
         
-        rem Extract templates
-        powershell -Command "& {Expand-Archive -Path 'templates.tpz' -DestinationPath 'temp_templates' -Force}"
+        rem Rename and extract templates
+        powershell -Command "& {Rename-Item 'templates.tpz' 'templates.zip'}"
+        powershell -Command "& {Expand-Archive -Path 'templates.zip' -DestinationPath 'temp_templates' -Force}"
         if not exist "%APPDATA%\Godot\export_templates" mkdir "%APPDATA%\Godot\export_templates"
         move "temp_templates\templates" "%TEMPLATE_DIR%"
         rmdir /s /q "temp_templates"
-        del "templates.tpz"
+        del "templates.zip"
         echo Export templates installed.
     )
 ) else (
