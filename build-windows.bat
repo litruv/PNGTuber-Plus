@@ -1,22 +1,24 @@
 @echo off
+setlocal
+
 echo Building PNGTuber Plus for Windows...
 
-:: Create build directory
+rem Create build directory
 if not exist "build\windows" mkdir "build\windows"
 
-:: Build the project
+rem Build the project
 echo Running Godot export...
-godot --headless --verbose --export-release "Windows Desktop" "build\windows\PNGTuber-Plus.exe"
+"D:\Godot\Godot_v4.4.1-stable_win64.exe" --headless --verbose --export-release "Windows Desktop" "build\windows\PNGTuber-Plus.exe"
 
 if %ERRORLEVEL% EQU 0 (
     echo.
-    echo ✅ Build completed successfully!
+    echo Build completed successfully!
     echo Output: build\windows\PNGTuber-Plus.exe
     echo.
-    pause
 ) else (
     echo.
-    echo ❌ Build failed with error code %ERRORLEVEL%
+    echo Build failed with error code %ERRORLEVEL%
     echo.
-    pause
 )
+
+pause

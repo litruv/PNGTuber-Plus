@@ -22,10 +22,24 @@ jobs:
         with:
           lfs: true
       
+      - name: Debug Environment
+        run: |
+          Write-Host "Current directory: $(Get-Location)"
+          Write-Host "Godot executable exists: $(Test-Path 'D:\Godot\Godot_v4.4.1-stable_win64.exe')"
+          Write-Host "Export name: $env:EXPORT_NAME"
+          Write-Host "Project file exists: $(Test-Path 'project.godot')"
+          Get-ChildItem -Path . -Filter "*.cfg" | Select-Object Name
+
       - name: Windows Build
         run: |
           New-Item -ItemType Directory -Force -Path "build\windows"
-          D:\Godot\Godot_v4.4.1-stable_win64.exe --headless --verbose --export-release "Windows Desktop" "build\windows\$env:EXPORT_NAME.exe"
+          & "D:\Godot\Godot_v4.4.1-stable_win64.exe" --headless --verbose --export-release "Windows Desktop" "build\windows\PNGTuber-Plus.exe"
+        continue-on-error: false
+
+      - name: Check Build Output
+        run: |
+          Write-Host "Build directory contents:"
+          Get-ChildItem -Path "build\windows" -Recurse | Select-Object Name, Length
       
       - name: Upload Windows Build
         uses: actions/upload-artifact@v4
@@ -38,7 +52,7 @@ jobs:
     name: Create Release
     needs: export-windows
     runs-on: self-hosted
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push' && success()
     steps:
       - name: Download Windows Build
         uses: actions/download-artifact@v4
