@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch PNGTuber Plus (Godot)",
+            "type": "godot",
+            "request": "launch",
+            "port": 6007,
+            "address": "127.0.0.1"
+        },
+        {
+            "name": "Attach to Running Godot",
+            "type": "godot",
+            "request": "attach",
+            "port": 6007,
+            "address": "127.0.0.1"
+        },
+        {
+            "name": "Launch Built Executable",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "if (Test-Path '${workspaceFolder}\\build\\windows\\PNGTuber-Plus.exe') { Start-Process '${workspaceFolder}\\build\\windows\\PNGTuber-Plus.exe' } else { Write-Host 'Executable not found. Build the project first.' }",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Build and Launch",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": ".\\build-windows.bat; if (Test-Path '.\\build\\windows\\PNGTuber-Plus.exe') { Start-Process '.\\build\\windows\\PNGTuber-Plus.exe' }",
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

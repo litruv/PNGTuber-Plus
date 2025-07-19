@@ -75,6 +75,15 @@ func setImage():
 	
 	$VisToggle/setToggle/Label.text = "toggle: \"" + Global.heldSprite.toggle +  "\""
 	
+	# Update masking controls
+	$Masking/useMaskCheckbox.button_pressed = Global.heldSprite.use_mask
+	$Masking/maskOpacityLabel.text = "mask opacity: " + str(Global.heldSprite.mask_opacity)
+	$Masking/maskOpacity.value = Global.heldSprite.mask_opacity
+	if Global.heldSprite.mask_texture_path.is_empty():
+		$Masking/maskPathLabel.text = "mask: (none)"
+	else:
+		$Masking/maskPathLabel.text = "mask: " + Global.heldSprite.mask_texture_path.get_file()
+	
 	changeRotLimit()
 	
 	setLayerButtons()
@@ -364,8 +373,25 @@ func _on_delete_pressed():
 func _on_set_toggle_pressed():
 	$VisToggle/setToggle/Label.text = "toggle: AWAITING INPUT"
 	await Global.main.fatfuckingballs
-	
-	var keys = await Global.main.spriteVisToggles
-	var key = keys[0]
-	Global.heldSprite.toggle = key
-	$VisToggle/setToggle/Label.text = "toggle: \"" + Global.heldSprite.toggle +  "\""
+
+## Masking signal handlers
+func _on_use_mask_checkbox_toggled(button_pressed):
+	Global.heldSprite.use_mask = button_pressed
+	Global.heldSprite.updateMaskShader()
+
+func _on_mask_opacity_value_changed(value):
+	Global.heldSprite.mask_opacity = value
+	$Masking/maskOpacityLabel.text = "mask opacity: " + str(value)
+	Global.heldSprite.updateMaskShader()
+
+func _on_select_mask_pressed():
+	Global.main.openMaskSelection()
+
+func updateMaskDisplay(path: String):
+	$Masking/maskPathLabel.text = "mask: " + path.get_file()
+	$Masking/useMaskCheckbox.button_pressed = true
+
+func _on_clear_mask_pressed():
+	Global.heldSprite.removeMask()
+	$Masking/maskPathLabel.text = "mask: (none)"
+	$Masking/useMaskCheckbox.button_pressed = false

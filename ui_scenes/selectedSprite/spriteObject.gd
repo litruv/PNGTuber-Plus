@@ -77,6 +77,12 @@ var ignoreBounce = false
 var frames = 1
 var animSpeed = 0
 
+#Masking
+var mask_texture_path = ""
+var mask_texture = null
+var use_mask = false
+var mask_opacity = 1.0
+
 var remadePolygon = false
 
 var clipped = false
@@ -118,6 +124,9 @@ func _ready():
 	imageSize = img.get_size()
 	
 	sprite.texture = tex
+	
+	# Initialize masking
+	setupMasking()
 	
 	var bitmap = BitMap.new()
 	bitmap.create_from_image_alpha(imageData)
@@ -409,3 +418,53 @@ func visToggle(keys):
 
 func makeVis():
 	$WobbleOrigin/DragOrigin.visible = true
+
+## Setup masking system
+func setupMasking():
+	if use_mask and mask_texture_path != "":
+		loadMaskTexture()
+	updateMaskShader()
+
+## Load mask texture from file path
+func loadMaskTexture():
+	if mask_texture_path == "":
+		return
+		
+	var img = Image.new()
+	var err = img.load(mask_texture_path)
+	if err != OK:
+		print_debug("Failed to load mask texture: " + mask_texture_path)
+		return
+	
+	mask_texture = ImageTexture.create_from_image(img)
+
+## Apply or remove mask shader
+func updateMaskShader():
+	if use_mask and mask_texture != null:
+		# Create mask material with shader
+		var mask_shader = load("res://ui_scenes/selectedSprite/mask.gdshader")
+		var mask_material = ShaderMaterial.new()
+		mask_material.shader = mask_shader
+		mask_material.set_shader_parameter("mask_texture", mask_texture)
+		mask_material.set_shader_parameter("use_mask", true)
+		mask_material.set_shader_parameter("mask_opacity", mask_opacity)
+		
+		sprite.material = mask_material
+	else:
+		# Remove mask material
+		sprite.material = null
+
+## Set mask texture from external source
+func setMaskTexture(texture_path: String, opacity: float = 1.0):
+	mask_texture_path = texture_path
+	mask_opacity = opacity
+	use_mask = true
+	loadMaskTexture()
+	updateMaskShader()
+
+## Remove masking
+func removeMask():
+	use_mask = false
+	mask_texture = null
+	mask_texture_path = ""
+	updateMaskShader()
