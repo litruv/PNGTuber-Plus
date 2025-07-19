@@ -99,6 +99,36 @@ jobs:
     runs-on: self-hosted
     if: github.ref == 'refs/heads/master' && github.event_name == 'push' && success()
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Generate Release Info
+        id: release_info
+        run: |
+          # Get current date and time
+          $date = Get-Date -Format "yyyy.MM.dd"
+          $time = Get-Date -Format "HHmm"
+          
+          # Get short commit hash (first 7 characters)
+          $shortSha = "${{ github.sha }}".Substring(0, 7)
+          
+          # Get commit count since last tag (for build number)
+          $buildNumber = & git rev-list --count HEAD
+          
+          # Create version-like tag and release name
+          $tag = "v$date-build$buildNumber"
+          $releaseName = "PNGTuber+ v$date Build $buildNumber"
+          
+          Write-Host "Generated tag: $tag"
+          Write-Host "Generated release name: $releaseName"
+          
+          # Set outputs for use in next steps
+          echo "tag=$tag" >> $env:GITHUB_OUTPUT
+          echo "release_name=$releaseName" >> $env:GITHUB_OUTPUT
+          echo "short_sha=$shortSha" >> $env:GITHUB_OUTPUT
+          echo "build_number=$buildNumber" >> $env:GITHUB_OUTPUT
       - name: Download Windows Build
         uses: actions/download-artifact@v4
         with:
@@ -111,21 +141,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: build-${{ github.sha }}
-          release_name: PNGTuber Plus Build ${{ github.sha }}
+          tag_name: ${{ steps.release_info.outputs.tag }}
+          release_name: ${{ steps.release_info.outputs.release_name }}
           body: |
             Automated build of PNGTuber Plus
-            
-            ## Recent Updates by Litruv
-            - **StreamDeck Integration**: Add buttons to enable the streamdeck plugin that was built in
-            - **Rotation Wobble**: New sprite rotation effects with frequency and amplitude controls  
-            - **Enhanced Modifier Keys**: Support for complex key combinations (Ctrl+Shift+Alt+Cmd)
-            - **Godot 4.4.1 Support**: Updated for latest Godot stable release
-            
+                        
             ## Installation
             1. Download PNGTuber-Plus.exe from the assets below
             2. Run the executable - no installation required!
             3. For StreamDeck integration, download the plugin from [here](https://github.com/BoyneGames/streamdeck-godot-plugin/releases/tag/1.0.0)
+            
+            ## Credits
+            - Original project by [kaiakairos](https://github.com/kaiakairos/PNGTuber-Plus)
+            - Microphone improvements by [k0ffinz](https://github.com/k0ffinz/PNGTuber-Plus)
           draft: false
           prerelease: false
       
