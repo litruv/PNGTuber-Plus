@@ -1,5 +1,6 @@
 name: Build Windows
 
+
 on:
   push:
     branches: [ master, main ]
@@ -14,24 +15,76 @@ env:
 jobs:
   export-windows:
     name: Windows Export
-    runs-on: ubuntu-20.04
-    container:
-      image: barichello/godot-ci:4.4.1
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           lfs: true
       
-      - name: Setup
+      - name: Debug Environment
         run: |
-          mkdir -v -p ~/.local/share/godot/export_templates/
-          mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-      
+          Write-Host "Current directory: $(Get-Location)"
+          Write-Host "Godot executable exists: $(Test-Path 'D:\Godot\Godot_v4.4.1-stable_win64.exe')"
+          Write-Host "Export name: $env:EXPORT_NAME"
+          Write-Host "Project file exists: $(Test-Path 'project.godot')"
+          Get-ChildItem -Path . -Filter "*.cfg" | Select-Object Name
+
+      - name: Verify Export Templates
+        run: |
+          $templateDir = "C:\WINDOWS\ServiceProfiles\NetworkService\AppData\Roaming\Godot\export_templates\4.4.1.stable"
+          Write-Host "Checking for export templates at: $templateDir"
+          
+          if (Test-Path $templateDir) {
+            Write-Host "Export templates found. Contents:"
+            Get-ChildItem -Path $templateDir | Where-Object {$_.Name -like "*windows*"} | Select-Object Name, Length | Format-Table
+            
+            # Verify the specific Windows templates we need
+            $debugTemplate = Join-Path $templateDir "windows_debug_x86_64.exe"
+            $releaseTemplate = Join-Path $templateDir "windows_release_x86_64.exe"
+            
+            if ((Test-Path $debugTemplate) -and (Test-Path $releaseTemplate)) {
+              Write-Host "✅ Required Windows templates found"
+            } else {
+              Write-Host "❌ Required Windows templates missing"
+              exit 1
+            }
+          } else {
+            Write-Host "❌ Export template directory not found!"
+            exit 1
+          }
+          
+          # Check if rcedit is available (it's already in the project)
+          Write-Host "Checking for rcedit..."
+          if (Test-Path "rcedit-x64.exe") {
+            Write-Host "✅ rcedit found in project directory"
+          } else {
+            Write-Host "rcedit not found - downloading..."
+            Invoke-WebRequest -Uri "https://github.com/electron/rcedit/releases/latest/download/rcedit-x64.exe" -OutFile "rcedit-x64.exe"
+            Write-Host "✅ rcedit downloaded"
+          }
+
       - name: Windows Build
+        run: .\build-windows-ci.bat
+        shell: cmd
+
+      - name: Check Build Output
         run: |
-          mkdir -v -p build/windows
-          godot --headless --verbose --export-release "Windows Desktop" build/windows/$EXPORT_NAME.exe
+          Write-Host "Build directory contents:"
+          if (Test-Path "build\windows") {
+            Get-ChildItem -Path "build\windows" -Recurse | Select-Object Name, Length
+          } else {
+            Write-Host "Build directory does not exist!"
+          }
+          
+          if (Test-Path "build\windows\PNGTuber-Plus.exe") {
+            Write-Host "Build SUCCESS: PNGTuber-Plus.exe created"
+            $fileSize = (Get-Item "build\windows\PNGTuber-Plus.exe").Length
+            Write-Host "File size: $fileSize bytes"
+          } else {
+            Write-Host "Build FAILED: PNGTuber-Plus.exe not found"
+            exit 1
+          }
       
       - name: Upload Windows Build
         uses: actions/upload-artifact@v4
@@ -43,8 +96,8 @@ jobs:
   release:
     name: Create Release
     needs: export-windows
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push' && success()
     steps:
       - name: Download Windows Build
         uses: actions/download-artifact@v4
