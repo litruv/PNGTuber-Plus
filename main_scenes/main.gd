@@ -480,9 +480,9 @@ func _on_kofi_pressed():
 	Global.pushUpdate("Support me on ko-fi!")
 
 
-func _on_twitter_pressed():
-	OS.shell_open("https://twitter.com/kaiakairos")
-	Global.pushUpdate("Follow me on twitter!")
+func _on_bluesky_pressed():
+	OS.shell_open("https://bsky.app/profile/kaiakairos.net")
+	Global.pushUpdate("Follow me on bluesky!")
 
 
 func _on_replace_button_pressed():

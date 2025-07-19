@@ -8,10 +8,10 @@
 - **Rotation Wobble**: New sprite rotation effects with frequency and amplitude controls
 - **Enhanced Modifier Keys**: Support for complex key combinations (Ctrl+Shift+Alt+Cmd)
 - **Godot 4.4.1 Support**: Updated for latest Godot stable release
+- **Microphone Improvements**: Audio delay fix & more *from [k0ffinz/PNGTuber-Plus](https://github.com/k0ffinz/PNGTuber-Plus)*
 
 ## 🙏 Credits
 
-- **Original Project**: PNGTuber Plus base application
+- **Original Project**: [PNGTuber Plus by kaiakairos](https://github.com/kaiakairos/PNGTuber-Plus)
 - **StreamDeck Plugin**: Based on [BoyneGames StreamDeck Godot Plugin](https://github.com/BoyneGames/streamdeck-godot-plugin)
-- **Enhanced Features**: Max Litruv Boonzaayer
-- **Microphone Improvements**: k0ffinz/Ralsi - Experimental mic loudness detection, improved audio initialization, and audio delay fixes from [k0ffinz/PNGTuber-Plus](https://github.com/k0ffinz/PNGTuber-Plus)
+- **Microphone Improvements**: k0ffinz - Experimental mic loudness detection, improved audio initialization, and audio delay fixes from [k0ffinz/PNGTuber-Plus](https://github.com/k0ffinz/PNGTuber-Plus)
