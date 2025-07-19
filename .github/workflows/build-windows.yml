@@ -30,12 +30,47 @@ jobs:
           Write-Host "Project file exists: $(Test-Path 'project.godot')"
           Get-ChildItem -Path . -Filter "*.cfg" | Select-Object Name
 
+      - name: Setup Export Templates
+        run: |
+          Write-Host "Setting up Godot export templates..."
+          $templatesPath = "$env:APPDATA\Godot\export_templates\4.4.1.stable"
+          if (!(Test-Path $templatesPath)) {
+            Write-Host "Export templates not found, downloading..."
+            New-Item -ItemType Directory -Force -Path $templatesPath
+            
+            # Download export templates
+            $templateUrl = "https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_export_templates.tpz"
+            $templateFile = "$env:TEMP\export_templates.tpz"
+            
+            Write-Host "Downloading from: $templateUrl"
+            Invoke-WebRequest -Uri $templateUrl -OutFile $templateFile
+            
+            # Extract templates
+            Expand-Archive -Path $templateFile -DestinationPath "$env:TEMP\templates" -Force
+            
+            # Copy templates to correct location
+            $extractedPath = "$env:TEMP\templates\templates"
+            if (Test-Path $extractedPath) {
+              Copy-Item -Path "$extractedPath\*" -Destination $templatesPath -Recurse -Force
+              Write-Host "Export templates installed successfully"
+            } else {
+              Write-Host "Failed to extract templates"
+              exit 1
+            }
+          } else {
+            Write-Host "Export templates already exist"
+          }
+
       - name: Windows Build
         run: |
           New-Item -ItemType Directory -Force -Path "build\windows"
           Write-Host "Starting Godot export..."
-          & "D:\Godot\Godot_v4.4.1-stable_win64.exe" --headless --verbose --export-release "Windows Desktop" "build\windows\PNGTuber-Plus.exe"
-          Write-Host "Godot exit code: $LASTEXITCODE"
+          
+          # Run Godot export with timeout
+          $process = Start-Process -FilePath "D:\Godot\Godot_v4.4.1-stable_win64.exe" -ArgumentList "--headless", "--verbose", "--export-release", "Windows Desktop", "build\windows\PNGTuber-Plus.exe" -PassThru -Wait -NoNewWindow
+          
+          Write-Host "Godot exit code: $($process.ExitCode)"
+          
           Write-Host "Checking if export file exists..."
           if (Test-Path "build\windows\PNGTuber-Plus.exe") {
             Write-Host "Export successful! File size: $((Get-Item 'build\windows\PNGTuber-Plus.exe').Length) bytes"
@@ -44,6 +79,11 @@ jobs:
             Write-Host "Checking default export location..."
             if (Test-Path ".export") {
               Get-ChildItem -Path ".export" -Recurse | Select-Object FullName, Length
+            }
+            Write-Host "Checking templates directory..."
+            $templatesPath = "$env:APPDATA\Godot\export_templates\4.4.1.stable"
+            if (Test-Path $templatesPath) {
+              Get-ChildItem -Path $templatesPath | Select-Object Name
             }
             exit 1
           }
