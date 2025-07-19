@@ -73,6 +73,10 @@ func setImage():
 	$Animation/animFramesLabel.text = "sprite frames: " + str(Global.heldSprite.frames)
 	$Animation/animFrames.value = Global.heldSprite.frames
 	
+	$Opacity/opacityLabel.text = "opacity: " + str(int(Global.heldSprite.spriteOpacity * 100)) + "%"
+	$Opacity/opacitySlider.value = Global.heldSprite.spriteOpacity
+	$Opacity/affectChildrenCheck.button_pressed = Global.heldSprite.affectChildrenOpacity
+	
 	$VisToggle/setToggle/Label.text = "toggle: \"" + Global.heldSprite.toggle +  "\""
 	
 	changeRotLimit()
@@ -369,3 +373,12 @@ func _on_set_toggle_pressed():
 	var key = keys[0]
 	Global.heldSprite.toggle = key
 	$VisToggle/setToggle/Label.text = "toggle: \"" + Global.heldSprite.toggle +  "\""
+
+func _on_opacity_slider_value_changed(value):
+	$Opacity/opacityLabel.text = "opacity: " + str(int(value * 100)) + "%"
+	Global.heldSprite.spriteOpacity = value
+	Global.heldSprite.updateOpacity()
+
+func _on_affect_children_check_toggled(button_pressed):
+	Global.heldSprite.affectChildrenOpacity = button_pressed
+	Global.heldSprite.updateOpacity()
