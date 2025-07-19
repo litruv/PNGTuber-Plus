@@ -30,6 +30,27 @@ jobs:
           Write-Host "Project file exists: $(Test-Path 'project.godot')"
           Get-ChildItem -Path . -Filter "*.cfg" | Select-Object Name
 
+      - name: Setup Export Templates
+        run: |
+          $templateDir = "C:\WINDOWS\ServiceProfiles\NetworkService\AppData\Roaming\Godot\export_templates\4.4.1.stable"
+          if (-not (Test-Path $templateDir)) {
+            Write-Host "Creating export template directory..."
+            New-Item -ItemType Directory -Force -Path $templateDir
+            
+            Write-Host "Downloading export templates..."
+            Invoke-WebRequest -Uri "https://downloads.tuxfamily.org/godotengine/4.4.1/Godot_v4.4.1-stable_export_templates.tpz" -OutFile "templates.tpz"
+            
+            Write-Host "Extracting templates..."
+            Expand-Archive -Path "templates.tpz" -DestinationPath "temp_templates" -Force
+            Copy-Item -Path "temp_templates\templates\*" -Destination $templateDir -Recurse -Force
+            Remove-Item -Path "temp_templates" -Recurse -Force
+            Remove-Item -Path "templates.tpz" -Force
+            
+            Write-Host "Export templates installed to: $templateDir"
+          } else {
+            Write-Host "Export templates already exist at: $templateDir"
+          }
+
       - name: Windows Build
         run: .\build-windows.bat
         shell: cmd
