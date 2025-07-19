@@ -1,0 +1,87 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.4.1
+  EXPORT_NAME: PNGTuber-Plus
+
+jobs:
+  export-windows:
+    name: Windows Export
+    runs-on: ubuntu-20.04
+    container:
+      image: barichello/godot-ci:4.4.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+      
+      - name: Setup
+        run: |
+          mkdir -v -p ~/.local/share/godot/export_templates/
+          mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+      
+      - name: Windows Build
+        run: |
+          mkdir -v -p build/windows
+          godot --headless --verbose --export-release "Windows Desktop" build/windows/$EXPORT_NAME.exe
+      
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: build/windows/
+          retention-days: 14
+
+  release:
+    name: Create Release
+    needs: export-windows
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    steps:
+      - name: Download Windows Build
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+          path: ./windows/
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: build-${{ github.sha }}
+          release_name: PNGTuber Plus Build ${{ github.sha }}
+          body: |
+            Automated build of PNGTuber Plus
+            
+            ## Recent Updates by Litruv
+            - **StreamDeck Integration**: Add buttons to enable the streamdeck plugin that was built in
+            - **Rotation Wobble**: New sprite rotation effects with frequency and amplitude controls  
+            - **Enhanced Modifier Keys**: Support for complex key combinations (Ctrl+Shift+Alt+Cmd)
+            - **Godot 4.4.1 Support**: Updated for latest Godot stable release
+            
+            ## Installation
+            1. Download PNGTuber-Plus.exe from the assets below
+            2. Run the executable - no installation required!
+            3. For StreamDeck integration, download the plugin from [here](https://github.com/BoyneGames/streamdeck-godot-plugin/releases/tag/1.0.0)
+          draft: false
+          prerelease: false
+      
+      - name: Upload Windows Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./windows/PNGTuber-Plus.exe
+          asset_name: PNGTuber-Plus.exe
+          asset_content_type: application/octet-stream
