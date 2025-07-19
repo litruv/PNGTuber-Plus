@@ -33,7 +33,7 @@ jobs:
       - name: Windows Build
         run: |
           New-Item -ItemType Directory -Force -Path "build\windows"
-          & "D:\Godot\Godot_v4.4.1-stable_win64.exe" --headless --verbose --export-release "Windows Desktop" "build\windows\PNGTuber-Plus.exe"
+          & "D:\Godot\Godot_v4.4.1-stable_win64.exe" --headless --export-release "Windows Desktop" "build\windows\PNGTuber-Plus.exe"
           Write-Host "Godot exit code: $LASTEXITCODE"
         continue-on-error: false
 
