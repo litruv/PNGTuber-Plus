@@ -140,40 +140,34 @@ jobs:
           # Get commits with format: short hash, subject, author
           $commits = & git log $commitRange --pretty=format:"%h|%s|%an" --no-merges
           
-          # Create a temporary file to store commit history
-          $tempFile = [System.IO.Path]::GetTempFileName()
+          # Build commit history as a single string
+          $commitHistory = ""
           
           if ($commits) {
-            "## Changes Since Last Release" | Out-File -FilePath $tempFile -Encoding UTF8
-            "" | Out-File -FilePath $tempFile -Append -Encoding UTF8
+            $commitHistory += "`n`n## Changes Since Last Release`n`n"
             
             $commits | ForEach-Object {
               $parts = $_ -split '\|', 3
               $hash = $parts[0]
-              $subject = $parts[1] -replace '"', '\"'
+              $subject = $parts[1] -replace '"', '""'
               $author = $parts[2]
               $commitUrl = "https://github.com/${{ github.repository }}/commit/$hash"
-              "- [$hash]($commitUrl) $subject (by $author)" | Out-File -FilePath $tempFile -Append -Encoding UTF8
+              $commitHistory += "- [$hash]($commitUrl) $subject (by $author)`n"
             }
           } else {
-            "## Changes Since Last Release" | Out-File -FilePath $tempFile -Encoding UTF8
-            "" | Out-File -FilePath $tempFile -Append -Encoding UTF8
-            "No new commits since last release." | Out-File -FilePath $tempFile -Append -Encoding UTF8
+            $commitHistory += "`n`n## Changes Since Last Release`n`nNo new commits since last release.`n"
           }
           
-          # Set outputs for use in next steps using multiline syntax
+          # Set outputs for use in next steps
           echo "tag=$tag" >> $env:GITHUB_OUTPUT
           echo "release_name=$releaseName" >> $env:GITHUB_OUTPUT
           echo "short_sha=$shortSha" >> $env:GITHUB_OUTPUT
           echo "build_number=$buildNumber" >> $env:GITHUB_OUTPUT
           
           # Use heredoc syntax for multiline commit history
-          echo "commit_history<<EOF" >> $env:GITHUB_OUTPUT
-          Get-Content $tempFile | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding UTF8
-          echo "EOF" >> $env:GITHUB_OUTPUT
-          
-          # Clean up temp file
-          Remove-Item $tempFile
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "commit_history<<EOF"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value $commitHistory
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "EOF"
       - name: Download Windows Build
         uses: actions/download-artifact@v4
         with:
